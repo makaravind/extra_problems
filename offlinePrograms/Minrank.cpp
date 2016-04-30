@@ -1,5 +1,6 @@
 //find the min rank of the number 
-// index of the number in the sorted array where all the permutation of the number in the array
+// index of the number in the sorted array where 
+//all the permutation of the number in the array
 #include<stdio.h>
 #include<conio.h>
 int Index(int*, int);
