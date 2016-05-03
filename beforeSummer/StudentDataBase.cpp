@@ -15,13 +15,6 @@ struct node{
 	node* left;
 	node* right;
 };
-struct MarksNode{
-	char name[50];
-	int id;
-	int total;
-	MarksNode *left;
-	MarksNode *right;
-};
 //  function declaration
 void MenuSelect(struct node*, char subjects[50][50], int no_subjects, int *ID);
 void MenuDisplay();
@@ -29,15 +22,13 @@ struct node* init(char[20], int *no_subjects, char subjects[][50], struct node *
 void Split(char *dirty, char clean[][50],char dirt);
 void SplitInt(char *dirty, int *clean, char dirt);
 struct node* Insert(struct node* r, char *name, int *marks, int id);
-struct MarksNode* InsertTotal(struct MarksNode* r, char *name, int marks, int id);
-struct MarksNode* LeaderBoard_TotalMarksEntries(struct MarksNode *root1, struct node* root2,char subjects[50][50], int no_subjects);
 struct node* DeleteById(struct node* root, int id,char *name);
 struct node * minValueNode(struct node* node);
 int isValidName(char *ip_name);
 int isValidMarks(char *marks);
 int isValidMarksInt(int marks);
 char* lowerCaseWord(char* a);
-int Sum(int *marks,int no_subjects);
+int Sum(int *marks, char subjects[50][50], int *selected_subjects ,int selected_ptr, int no_subjects);
 float Average(int *marks, int no_subjects);
 char Grade(int total,int max);
 int FindSubjectIndex(char all_subjects[50][50],int no_subjects,char *subject);
@@ -48,10 +39,10 @@ void SelectByIdName(struct node *root, int id,char *del_name);
 void SearchByName(struct node *root, char *sName, int *id_array, int *id_ptr);
 void Feature_StudentPortalMenu(struct node* root, char subjects[50][50], int no_subjects);
 void Feature_DisplayDb(struct node* root, char *subjects, int no_subjects);
-void Feature_DisplayTotalDb(struct MarksNode* root2, char subjects[50][50], int no_subjects,int K);
+void Feature_DisplayTotalDb(struct node* root2, char subjects[50][50], int no_subjects, int* selected_subjects,int selected_ptr,int K);
 void Feature_DisplayTopper(struct MarksNode* root2, char subjects[50][50], int no_subjects);
-void Feature_DisplayPromoted(struct MarksNode* root2, char subjects[50][50], int no_subjects);
-void Feature_DisplayFailed(struct MarksNode* root2, char subjects[50][50], int no_subjects);
+void Feature_DisplayPromoted(struct node* root2, char subjects[50][50], int no_subjects);
+void Feature_DisplayFailed(struct node* root2, char subjects[50][50], int no_subjects);
 void Feature_DisplaySubject(struct node* root, char subject[50][50], int no_subjects, char *xSubject);
 void Feature_DisplayStudentSubject(struct node* root, char subject[50][50], int no_subjects,int id,int isubject);
 void Feature_DiplayStudentMarks(struct node* root, char subject[50][50], int no_subjects, int id);
@@ -65,44 +56,56 @@ void Feature_EditEntry_Edit(struct node* root, char subjects[50][50], int no_sub
 void Feature_DeleteEntry(struct node* root, char subjects[50][50], int no_subjects, int *ID);
 void Feature_LeaderBoard(struct node* root, char subjects[50][50], int no_subjects, int *ID);
 void Feature_LeaderBoard_Total(struct node* root, char subjects[50][50], int no_subjects, int *ID);
-void Feature_LeaderBoard_GreaterThan(struct node* root, char subjects[50][50], int no_subjects, int *ID);
-void Feature_LeaderBoard_Topper(struct node* root, char subjects[50][50], int no_subjects, int *ID);
+void Feature_LeaderBoard_GreaterThan(struct node* root, char subjects[50][50], int no_subjects, int *selected_subjects, int selected_ptr, int *ID);
+//void Feature_LeaderBoard_Topper(struct node* root, char subjects[50][50], int no_subjects, int *ID);
 void Feature_LeaderBoard_Promoted(struct node* root, char subjects[50][50], int no_subjects, int *ID);
 void Feature_LeaderBoard_Failed(struct node* root, char subjects[50][50], int no_subjects, int *ID);
 // function definitions
 void Feature_LeaderBoard_Failed(struct node* root, char subjects[50][50], int no_subjects, int *ID){
 
-	struct MarksNode *root2 = NULL;
-	root2 = LeaderBoard_TotalMarksEntries(root2, root, subjects, no_subjects);
 	printf("Failed students\n");
-	Feature_DisplayFailed(root2, subjects, no_subjects);
+	Feature_DisplayFailed(root, subjects, no_subjects);
 }
 void Feature_LeaderBoard_Promoted(struct node* root, char subjects[50][50], int no_subjects, int *ID){
 
-	struct MarksNode *root2 = NULL;
-	root2 = LeaderBoard_TotalMarksEntries(root2, root, subjects, no_subjects);
 	printf("Promoted students\n");
-	Feature_DisplayPromoted(root2, subjects, no_subjects);
+	Feature_DisplayPromoted(root, subjects, no_subjects);
 }
 void Feature_LeaderBoard_Topper(struct node* root, char subjects[50][50], int no_subjects, int *ID){
 
-	struct MarksNode *root2 = NULL;
-	root2 = LeaderBoard_TotalMarksEntries(root2, root, subjects, no_subjects);
-	Feature_DisplayTopper(root2, subjects, no_subjects);
+//	Feature_DisplayTopper(root, subjects, no_subjects);
+	printf("topper displayed here");
 }
 void Feature_LeaderBoard_GreaterThan(struct node* root, char subjects[50][50], int no_subjects, int *ID){
-	struct MarksNode *root2 = NULL;
+
 	int K = -1;
-	root2 = LeaderBoard_TotalMarksEntries(root2, root, subjects, no_subjects);
-	printf("enter marks greater than: (max is %d)", 100 * no_subjects);
-	scanf("%d", &K);
-	Feature_DisplayTotalDb(root2, subjects, no_subjects, K);
+	int *selected_subjects = (int*)malloc(sizeof(int)*(no_subjects));
+	int select_ptr = 0;
+	printf("select the subjects:(press -2 when you finish)\n");
+	// displaying the subjects
+	for (int i = 0; i < no_subjects; i++) printf("%d. %s\n", i + 1, subjects[i]);
+	printf("enter 100 for all");
+	while (1)
+	{
+		scanf("%d", &K);
+		if (K == -2 || K==100) break;
+		else selected_subjects[select_ptr++] = K;
+	}
+	if (K != 100){
+		printf("enter marks greater than: (max is %d)", 100 * select_ptr);
+		scanf("%d", &K);
+		Feature_DisplayTotalDb(root, subjects, no_subjects, selected_subjects, select_ptr, K);
+	}
+	else if (K == 100){
+		printf("enter marks greater than: (max is %d)", 100 * no_subjects);
+		scanf("%d", &K);
+		Feature_DisplayTotalDb(root, subjects, no_subjects, NULL, NULL, K);
+	}
+	else{ printf("enter correct option!\n"); }
 }
 void Feature_LeaderBoard_Total(struct node* root, char subjects[50][50], int no_subjects, int *ID){
 
-	struct MarksNode *root2 = NULL;
-	root2 = LeaderBoard_TotalMarksEntries(root2, root, subjects, no_subjects);
-	Feature_DisplayTotalDb(root2, subjects, no_subjects,-1);
+	Feature_DisplayTotalDb(root, subjects, no_subjects,NULL,NULL,-1);
 }
 void Feature_LeaderBoard(struct node* root, char subjects[50][50], int no_subjects, int *ID){
 
@@ -348,7 +351,7 @@ void Feature_DisplayIsPassOrFail(struct node* root, char subject[50][50], int no
 	if (root != NULL){
 		if (root->id == id){
 			printf("Grade of %s :", root->name);
-			printf("%c", Grade(Sum(root->marks, no_subjects), no_subjects * 100));
+			printf("%c", Grade(Sum(root->marks,subject,NULL,NULL, no_subjects), no_subjects * 100));
 		}
 		Feature_DisplayAverage(root->left, subject, no_subjects, id);
 		Feature_DisplayAverage(root->right, subject, no_subjects, id);
@@ -368,7 +371,7 @@ void Feature_DisplayMaximumMarks(struct node* root, char subject[50][50], int no
 	if (root != NULL){
 		if (root->id == id){
 			printf("Marks of %s :", root->name);
-			printf("%d", Sum(root->marks,no_subjects));
+			printf("%d", Sum(root->marks,subject,NULL,NULL,no_subjects));
 		}
 		Feature_DiplayStudentMarks(root->left, subject, no_subjects, id);
 		Feature_DiplayStudentMarks(root->right, subject, no_subjects, id);
@@ -402,29 +405,31 @@ void Feature_DisplaySubject(struct node* root, char subjects[50][50], int no_sub
 		Feature_DisplaySubject(root->right, subjects, no_subjects, xSubject);
 	}
 }
-void Feature_DisplayFailed(struct MarksNode* root2, char subjects[50][50], int no_subjects){
+void Feature_DisplayFailed(struct node* root2, char subjects[50][50], int no_subjects){
 
 	if (root2){
 		Feature_DisplayFailed(root2->right, subjects, no_subjects);
-		if (Grade(root2->total, 100 * no_subjects) == 'F'){
-			printf("%d. %s - %d\n", root2->id, root2->name, root2->total);
+		int Total = Sum(root2->marks, subjects, NULL, NULL, no_subjects);
+		if (Grade(Total, 100 * no_subjects) == 'F'){
+			printf("%d. %s - %d\n", root2->id, root2->name, Total);
 			printf("\n");
 		}
 		Feature_DisplayFailed(root2->left, subjects, no_subjects);
 	}
 }
-void Feature_DisplayPromoted(struct MarksNode* root2, char subjects[50][50], int no_subjects){
+void Feature_DisplayPromoted(struct node* root2, char subjects[50][50], int no_subjects){
 
 	if (root2){
 		Feature_DisplayPromoted(root2->right, subjects, no_subjects);
-		if (Grade(root2->total,100*no_subjects) != 'F'){
-			printf("%d. %s - %d\n", root2->id, root2->name, root2->total);
+		int Total = Sum(root2->marks, subjects, NULL, NULL, no_subjects);
+		if (Grade(Total, 100 * no_subjects) != 'F'){
+			printf("%d. %s - %d\n", root2->id, root2->name, Total);
 			printf("\n");
 		}
 		Feature_DisplayPromoted(root2->left, subjects, no_subjects);
 	}
 }
-void Feature_DisplayTopper(struct MarksNode* root2, char subjects[50][50], int no_subjects){
+/*void Feature_DisplayTopper(struct MarksNode* root2, char subjects[50][50], int no_subjects){
 
 	if(root2){
 		Feature_DisplayTopper(root2->right, subjects, no_subjects);
@@ -433,16 +438,17 @@ void Feature_DisplayTopper(struct MarksNode* root2, char subjects[50][50], int n
 			return;
 		Feature_DisplayTopper(root2->left, subjects, no_subjects);
 	}
-}
-void Feature_DisplayTotalDb(struct MarksNode* root2, char subjects[50][50], int no_subjects,int K){
+}*/
+void Feature_DisplayTotalDb(struct node* root2, char subjects[50][50], int no_subjects, int *selected_subjects, int selected_ptr, int K){
 
 	if (root2){
-		Feature_DisplayTotalDb(root2->right, subjects, no_subjects,K);
-		if (K == -1 || root2->total > K){
-			printf("%d. %s - %d\n", root2->id, root2->name, root2->total);
+		Feature_DisplayTotalDb(root2->right, subjects, no_subjects,selected_subjects,selected_ptr,K);
+		int total = Sum(root2->marks, subjects, selected_subjects, selected_ptr, no_subjects);
+		if (K == -1 || total > K){
+			printf("%d. %s - %d\n", root2->id, root2->name, total);
 			printf("\n");
 		}
-		Feature_DisplayTotalDb(root2->left, subjects, no_subjects,K);
+		Feature_DisplayTotalDb(root2->left, subjects, no_subjects, selected_subjects, selected_ptr, K);
 	}
 }
 void Feature_DisplayDb(struct node* root,char subjects[50][50],int no_subjects){
@@ -529,12 +535,21 @@ float Average(int *marks, int no_subjects){
 	}
 	return total/(float)no_subjects;
 }
-int Sum(int *marks,int no_subjects){
+int Sum(int *marks, char subjects[50][50], int *selected_subjects, int selected_ptr, int no_subjects){
 	int total = 0;
-	for (int i = 0; i < no_subjects; i++){
-		total += marks[i];
+	if (selected_subjects == NULL && selected_ptr == NULL){
+		for (int i = 0; i < no_subjects; i++){
+			total += marks[i];
+		}
+		return total;
 	}
-	return total;
+	else if (selected_subjects != NULL && selected_ptr != NULL){
+		for (int i = 0; i < selected_ptr; i++){
+			total += marks[selected_subjects[i]];
+		}
+		return total;
+	}
+	else return -1; // error
 }
 char* lowerCaseWord(char* a)
 {
@@ -569,19 +584,6 @@ struct node * minValueNode(struct node* node){
 		current = current->left;
 	return current;
 }
-struct MarksNode* LeaderBoard_TotalMarksEntries(struct MarksNode *root1, struct node* root2,char subjects[50][50], int no_subjects){
-
-	// preorder travel root2;
-	// find sum and insert into root1
-	
-	if (root2){
-		root1 = InsertTotal(root1, root2->name, Sum(root2->marks, no_subjects), root2->id);
-		LeaderBoard_TotalMarksEntries(root1,root2->left,subjects,no_subjects);
-		LeaderBoard_TotalMarksEntries(root1, root2->right, subjects, no_subjects);
-	}
-
-	return root1;
-}
 struct node* DeleteById(struct node* root, int id, char *name){
 	
 	if (root == NULL) return root;
@@ -614,28 +616,6 @@ struct node* DeleteById(struct node* root, int id, char *name){
 		root->right = DeleteById(root->right, id, name);
 
 	return root;
-}
-struct MarksNode* InsertTotal(struct MarksNode* r, char *name, int marks, int id){
-
-	if (r == NULL)
-	{
-		r = (struct MarksNode*) malloc(sizeof(struct MarksNode));
-		r->id = id;
-		strcpy(r->name, name);
-		r->total = marks;
-		r->left = NULL;
-		r->right = NULL;
-	}
-	else if (id == r->id){
-		// if same id found
-	}
-	else if (r->total > marks){
-		r->left = InsertTotal(r->left, name, marks, id);
-	}
-	else {
-		r->right = InsertTotal(r->right, name, marks, id);
-	}
-	return r;
 }
 struct node* Insert(struct node* r, char *name, int *marks, int id)
 {
